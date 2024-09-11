@@ -42,7 +42,7 @@ def process_folder(folder_path, output_file, file_extensions=None, ignore_folder
         return
 
     if ignore_folders is None:
-        ignore_folders = ['.git', 'node_modules', '__pycache__']
+        ignore_folders = []
 
     all_files = []
     for root, _, files in os.walk(folder_path):
@@ -54,7 +54,7 @@ def process_folder(folder_path, output_file, file_extensions=None, ignore_folder
 
     all_files.sort()
 
-    with open(output_file, 'w', encoding='utf-8') as outfile:
+    with open(output_file, 'w', encoding='utf-8', errors="ignore") as outfile:
         outfile.write("<file_overview>\n")
         outfile.write(f"Total files: {len(all_files)}\n")
         outfile.write(f"Date generated: {datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n")
@@ -78,7 +78,7 @@ def process_folder(folder_path, output_file, file_extensions=None, ignore_folder
 
                 outfile.write(f'<file path="{relative_path}" size="{file_size}" modified="{mod_time}">\n')
 
-                with open(file_path, 'r', encoding='utf-8') as infile:
+                with open(file_path, 'r', encoding='utf-8', errors="ignore") as infile:
                     content = infile.read()
 
                 outfile.write(content.strip())
