@@ -40,13 +40,15 @@ MARKDOWN_OUTPUT_TEMPLATE = """# File Overview
 
 {FILES_INCLUDED}
 
----
 
+## Files Contents
+
+---
 {FILE_CONTENTS}
 """
 
 # Template for individual file content
-MARKDOWN_FILE_TEMPLATE = """## {FILE_NAME}
+MARKDOWN_FILE_TEMPLATE = """### {FILE_NAME}
 
 - **Path:** `{FILE_PATH}`
 - **Lines:** {LINES_COUNT}
