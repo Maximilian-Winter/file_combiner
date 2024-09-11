@@ -29,6 +29,23 @@ file-combiner /path/to/folder --output combined_output.txt --extensions .py .txt
 - `--custom-output-template`: Path to custom output template file (required if mode is custom)
 - `--custom-file-template`: Path to custom file content template file (required if mode is custom)
 
+## Example Usage
+
+1. Basic usage with default XML mode:
+```
+file-combiner example_folder
+```
+
+2. Using Markdown mode with specific extensions and ignoring certain folders:
+```
+file-combiner example_folder --mode markdown --output combined_output.md --extensions .py .txt --ignore venv .git
+```
+
+3. Using custom templates:
+```
+file-combiner example_folder --mode custom --output custom_output.txt --custom-output-template my_output_template.txt --custom-file-template my_file_template.txt
+```
+
 ## Template System
 
 File Combiner uses a flexible template system to format the output. There are three built-in modes:
@@ -110,23 +127,6 @@ Example custom file content template:
 {FILE_CONTENT}
 ```
 
-```
-
-## Example Usage
-
-1. Basic usage with default XML mode:
-```
-file-combiner example_folder
-```
-
-2. Using Markdown mode with specific extensions and ignoring certain folders:
-```
-file-combiner example_folder --mode markdown --output combined_output.md --extensions .py .txt --ignore venv .git
-```
-
-3. Using custom templates:
-```
-file-combiner example_folder --mode custom --output custom_output.txt --custom-output-template my_output_template.txt --custom-file-template my_file_template.txt
 ```
 
 ## License
