@@ -1,6 +1,64 @@
 import os
 import datetime
+import math
 
+from file_combiner.combiner_template import CombinerTemplate
+
+# Template for the overall output file
+XML_OUTPUT_TEMPLATE = """<file_overview>
+Total files: {TOTAL_FILES}
+Date generated: {DATE_GENERATED}
+Folder Structure:
+{FOLDER_TREE}
+
+Files included:
+{FILES_INCLUDED}
+</file_overview>
+
+{FILE_CONTENTS}"""
+
+# Template for individual file content
+XML_FILE_TEMPLATE = """<file path="{FILE_PATH}" lines="{LINES_COUNT}" modified="{MODIFIED_TIME}">
+{FILE_CONTENT}
+</file>
+
+"""
+
+# Template for the overall output file
+MARKDOWN_OUTPUT_TEMPLATE = """# File Overview
+
+- **Total files:** {TOTAL_FILES}
+- **Date generated:** {DATE_GENERATED}
+
+## Folder Structure
+
+```
+{FOLDER_TREE}
+```
+
+## Files Included
+
+{FILES_INCLUDED}
+
+---
+
+{FILE_CONTENTS}
+"""
+
+# Template for individual file content
+MARKDOWN_FILE_TEMPLATE = """## {FILE_NAME}
+
+- **Path:** `{FILE_PATH}`
+- **Lines:** {LINES_COUNT}
+- **Modified:** {MODIFIED_TIME}
+
+```
+{FILE_CONTENT}
+```
+
+---
+
+"""
 
 def is_last_item(current_index, contents, path, file_extensions):
     """Check if the current item is the last visible item in the directory."""
@@ -36,10 +94,12 @@ def create_folder_tree(path, file_extensions=None, ignore_folders=None, prefix='
     return tree
 
 
-def process_folder(folder_path, output_file, file_extensions=None, ignore_folders=None):
+def process_folder(folder_path, output_file, file_extensions=None, ignore_folders=None, add_line_numbers=False):
     if not os.path.isdir(folder_path):
         print(f"Error: The folder '{folder_path}' does not exist.")
         return
+
+
 
     if ignore_folders is None:
         ignore_folders = []
@@ -54,36 +114,48 @@ def process_folder(folder_path, output_file, file_extensions=None, ignore_folder
 
     all_files.sort()
 
+    output_template = CombinerTemplate(template_string=XML_OUTPUT_TEMPLATE)
+    file_template = CombinerTemplate(template_string=XML_FILE_TEMPLATE)
+
     with open(output_file, 'w', encoding='utf-8', errors="ignore") as outfile:
-        outfile.write("<file_overview>\n")
-        outfile.write(f"Total files: {len(all_files)}\n")
-        outfile.write(f"Date generated: {datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n")
-        if file_extensions:
-            outfile.write(f"File types included: {', '.join(file_extensions)}\n")
-        outfile.write("Folder Structure:\n")
         folder_tree = create_folder_tree(folder_path, file_extensions, ignore_folders)
-        outfile.write(folder_tree)
-        outfile.write("\nFiles included:\n")
+        files_included = "\n".join(f"- {os.path.relpath(f, folder_path)}" for f in all_files)
+
+        all_file_contents = []
         for file_path in all_files:
             relative_path = os.path.relpath(file_path, folder_path)
-            outfile.write(f"- {relative_path}\n")
-        outfile.write("</file_overview>\n\n")
+            file_stats = os.stat(file_path)
+            mod_time = datetime.datetime.fromtimestamp(file_stats.st_mtime).strftime('%Y-%m-%d %H:%M:%S')
 
-        for file_path in all_files:
-            try:
-                relative_path = os.path.relpath(file_path, folder_path)
-                file_stats = os.stat(file_path)
-                file_size = file_stats.st_size
-                mod_time = datetime.datetime.fromtimestamp(file_stats.st_mtime).strftime('%Y-%m-%d %H:%M:%S')
+            with open(file_path, 'r', encoding='utf-8', errors="ignore") as infile:
+                content = infile.readlines()
+            line_count = len(content)
+            if add_line_numbers:
+                line_number_width = len(str(len(content)))
+                numbered_content = [f"{i+1:<{line_number_width}}| {line}" for i, line in enumerate(content)]
+                formatted_content = "".join(numbered_content)
+            else:
+                formatted_content = "".join(content)
 
-                outfile.write(f'<file path="{relative_path}" size="{file_size}" modified="{mod_time}">\n')
+            file_content = file_template.generate_output_file_content(
+                FILE_PATH=relative_path,
+                LINES_COUNT=line_count,
+                MODIFIED_TIME=mod_time,
+                FILE_CONTENT=formatted_content.rstrip()
+            )
+            all_file_contents.append(file_content)
 
-                with open(file_path, 'r', encoding='utf-8', errors="ignore") as infile:
-                    content = infile.read()
+        output_content = output_template.generate_output_file_content(
+            TOTAL_FILES=len(all_files),
+            DATE_GENERATED=datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+            FOLDER_TREE=folder_tree.strip(),
+            FILES_INCLUDED=files_included,
+            FILE_CONTENTS="".join(all_file_contents)
+        )
 
-                outfile.write(content.strip())
-                outfile.write("\n</file>\n\n")
-            except Exception as e:
-                print(f"Error reading file '{file_path}': {str(e)}")
+        outfile.write(output_content)
 
-    print(f"All{'specified' if file_extensions else ''} files have been processed and combined into '{output_file}'.")
+    print(f"All files have been processed and combined into '{output_file}'.")
+
+# Example usage:
+# process_folder("/path/to/folder", "output.txt", file_extensions=[".py", ".txt"], ignore_folders=[".git", "venv"], add_line_numbers=True)
