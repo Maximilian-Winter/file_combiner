@@ -1,2 +1,4 @@
 file_combiner.egg-info
 file_combiner/__pycache__
+/llm_file_combiner.egg-info
+/dist

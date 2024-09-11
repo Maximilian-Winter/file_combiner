@@ -3,8 +3,8 @@ requires = ["setuptools>=61.0", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "file_combiner"
-version = "0.1.0"
+name = "llm_file_combiner"
+version = "0.3.0"
 authors = [
     { name="Maximilian Winter", email="maximilian.winter.91@gmail.com" },
 ]
@@ -18,8 +18,8 @@ classifiers = [
 ]
 
 [project.urls]
-"Homepage" = "https://github.com/MaximilianWinter/file_combiner"
-"Bug Tracker" = "https://github.com/MaximilianWinter/file_combiner/issues"
+"Homepage" = "https://github.com/Maximilian-Winter/file_combiner"
+"Bug Tracker" = "https://github.com/Maximilian-Winter/file_combiner/issues"
 
 [project.scripts]
 file-combiner = "file_combiner.cli:main"
