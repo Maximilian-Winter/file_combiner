@@ -41,7 +41,7 @@ Folder Structure:
 Files included:
 - main.py
 - readme.md
-  </file_overview>
+</file_overview>
 
 <file path="main.py" size="81" modified="2024-09-11 18:56:34">
 def main():
