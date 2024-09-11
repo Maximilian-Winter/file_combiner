@@ -1,8 +1,8 @@
 import os
 import datetime
 import math
+from .combiner_template import CombinerTemplate
 
-from file_combiner.combiner_template import CombinerTemplate
 
 # Template for the overall output file
 XML_OUTPUT_TEMPLATE = """<file_overview>
@@ -94,12 +94,14 @@ def create_folder_tree(path, file_extensions=None, ignore_folders=None, prefix='
     return tree
 
 
-def process_folder(folder_path, output_file, file_extensions=None, ignore_folders=None, add_line_numbers=False):
+
+# XML and Markdown templates remain the same
+
+def process_folder(folder_path, output_file, file_extensions=None, ignore_folders=None, add_line_numbers=False,
+                   mode="xml", custom_output_template=None, custom_file_template=None):
     if not os.path.isdir(folder_path):
         print(f"Error: The folder '{folder_path}' does not exist.")
         return
-
-
 
     if ignore_folders is None:
         ignore_folders = []
@@ -114,8 +116,19 @@ def process_folder(folder_path, output_file, file_extensions=None, ignore_folder
 
     all_files.sort()
 
-    output_template = CombinerTemplate(template_string=XML_OUTPUT_TEMPLATE)
-    file_template = CombinerTemplate(template_string=XML_FILE_TEMPLATE)
+    if mode.lower() == "xml":
+        output_template = CombinerTemplate(template_string=XML_OUTPUT_TEMPLATE)
+        file_template = CombinerTemplate(template_string=XML_FILE_TEMPLATE)
+    elif mode.lower() == "markdown":
+        output_template = CombinerTemplate(template_string=MARKDOWN_OUTPUT_TEMPLATE)
+        file_template = CombinerTemplate(template_string=MARKDOWN_FILE_TEMPLATE)
+    elif mode.lower() == "custom":
+        if not custom_output_template or not custom_file_template:
+            raise ValueError("Custom mode requires both custom output and file templates.")
+        output_template = CombinerTemplate.from_file(custom_output_template)
+        file_template = CombinerTemplate.from_file(custom_file_template)
+    else:
+        raise ValueError(f"Invalid mode: {mode}. Choose 'xml', 'markdown', or 'custom'.")
 
     with open(output_file, 'w', encoding='utf-8', errors="ignore") as outfile:
         folder_tree = create_folder_tree(folder_path, file_extensions, ignore_folders)
@@ -139,6 +152,7 @@ def process_folder(folder_path, output_file, file_extensions=None, ignore_folder
 
             file_content = file_template.generate_output_file_content(
                 FILE_PATH=relative_path,
+                FILE_NAME=os.path.basename(file_path),
                 LINES_COUNT=line_count,
                 MODIFIED_TIME=mod_time,
                 FILE_CONTENT=formatted_content.rstrip()
@@ -155,7 +169,12 @@ def process_folder(folder_path, output_file, file_extensions=None, ignore_folder
 
         outfile.write(output_content)
 
-    print(f"All files have been processed and combined into '{output_file}'.")
+    print(f"All files have been processed and combined into '{output_file}' using {mode} mode.")
+
+# Example usage:
+# process_folder("/path/to/folder", "output.txt", file_extensions=[".py", ".txt"], ignore_folders=[".git", "venv"],
+#                add_line_numbers=True, mode="custom", custom_output_template="path/to/output_template.txt",
+#                custom_file_template="path/to/file_template.txt")
 
 # Example usage:
 # process_folder("/path/to/folder", "output.txt", file_extensions=[".py", ".txt"], ignore_folders=[".git", "venv"], add_line_numbers=True)
