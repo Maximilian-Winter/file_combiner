@@ -12,13 +12,19 @@ pip install llm_file_combiner
 
 ## Usage
 
-After installation, you can use the `file-combiner` command from anywhere in your terminal:
+After installation, you can use the following commands from anywhere in your terminal:
+
+1. `file-combiner`: Combines files in a folder
+2. `folder-tree`: Generates a folder structure tree
+3. `file-list`: Generates a list of files in a folder
+
+### file-combiner command
 
 ```
 file-combiner /path/to/folder --output combined_output.txt --extensions .py .txt --ignore venv .git
 ```
 
-### Arguments:
+#### Arguments:
 
 - `folder_path`: Path to the folder to process (required)
 - `--output`: Name of the output file (default: output.txt)
@@ -29,9 +35,39 @@ file-combiner /path/to/folder --output combined_output.txt --extensions .py .txt
 - `--custom-output-template`: Path to custom output template file (required if mode is custom)
 - `--custom-file-template`: Path to custom file content template file (required if mode is custom)
 
+### folder-tree command
+
+The `folder-tree` command generates a tree structure of the specified folder.
+
+```
+folder-tree /path/to/folder --output folder_tree.txt --extensions .py .txt --ignore venv .git
+```
+
+#### Arguments:
+
+- `folder_path`: Path to the folder to process (required)
+- `--output`: Name of the output file (default: folder_tree.txt)
+- `--extensions`: File extensions to include (e.g., .py .txt)
+- `--ignore`: Folders to ignore (default: ['.git', 'node_modules', '__pycache__'])
+
+### file-list command
+
+The `file-list` command generates a list of files in the specified folder.
+
+```
+file-list /path/to/folder --output file_list.txt --extensions .py .txt --ignore venv .git
+```
+
+#### Arguments:
+
+- `folder_path`: Path to the folder to process (required)
+- `--output`: Name of the output file (default: file_list.txt)
+- `--extensions`: File extensions to include (e.g., .py .txt)
+- `--ignore`: Folders to ignore (default: ['.git', 'node_modules', '__pycache__'])
+
 ## Example Usage
 
-1. Basic usage with default XML mode:
+1. Basic usage of file-combiner with default XML mode:
 ```
 file-combiner example_folder
 ```
@@ -44,6 +80,16 @@ file-combiner example_folder --mode markdown --output combined_output.md --exten
 3. Using custom templates:
 ```
 file-combiner example_folder --mode custom --output custom_output.txt --custom-output-template my_output_template.txt --custom-file-template my_file_template.txt
+```
+
+4. Generating a folder tree:
+```
+folder-tree example_folder --output folder_structure.txt --extensions .py .txt --ignore venv
+```
+
+5. Generating a file list:
+```
+file-list example_folder --output files_in_project.txt --extensions .py .txt --ignore venv
 ```
 
 ## Template System

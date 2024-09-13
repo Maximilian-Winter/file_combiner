@@ -3,7 +3,6 @@ import datetime
 import math
 from .combiner_template import CombinerTemplate
 
-
 # Template for the overall output file
 XML_OUTPUT_TEMPLATE = """<file_overview>
 Total files: {TOTAL_FILES}
@@ -62,6 +61,7 @@ MARKDOWN_FILE_TEMPLATE = """### {FILE_NAME}
 
 """
 
+
 def is_last_item(current_index, contents, path, file_extensions):
     """Check if the current item is the last visible item in the directory."""
     for i in range(current_index + 1, len(contents)):
@@ -96,8 +96,29 @@ def create_folder_tree(path, file_extensions=None, ignore_folders=None, prefix='
     return tree
 
 
-
 # XML and Markdown templates remain the same
+
+def create_file_list(folder_path, file_extensions=None, ignore_folders=None):
+    if not os.path.isdir(folder_path):
+        print(f"Error: The folder '{folder_path}' does not exist.")
+        return
+
+    if ignore_folders is None:
+        ignore_folders = []
+
+    all_files = []
+    for root, _, files in os.walk(folder_path):
+        if any(ignored in root.split(os.sep) for ignored in ignore_folders):
+            continue
+        for filename in files:
+            if file_extensions is None or any(filename.endswith(ext) for ext in file_extensions):
+                all_files.append(os.path.join(root, filename))
+
+    all_files.sort()
+    files_included = "\n".join(f"- {os.path.relpath(f, folder_path)}" for f in all_files)
+
+    return files_included
+
 
 def process_folder(folder_path, output_file, file_extensions=None, ignore_folders=None, add_line_numbers=False,
                    mode="xml", custom_output_template=None, custom_file_template=None):
@@ -147,7 +168,7 @@ def process_folder(folder_path, output_file, file_extensions=None, ignore_folder
             line_count = len(content)
             if add_line_numbers:
                 line_number_width = len(str(len(content)))
-                numbered_content = [f"{i+1:<{line_number_width}}| {line}" for i, line in enumerate(content)]
+                numbered_content = [f"{i + 1:<{line_number_width}}| {line}" for i, line in enumerate(content)]
                 formatted_content = "".join(numbered_content)
             else:
                 formatted_content = "".join(content)
